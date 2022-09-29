@@ -18,11 +18,11 @@ headers = {
 }
 
 # Setting up a Selenium webdriver
-driver = webdriver.Chrome(executable_path = '/Users/carlostorunopaniagua/Documents/GitHub/chromedriver')
+driver = webdriver.Chrome(executable_path = '/Users/carlostorunopaniagua/Documents/GitHub/chromedriver_mac64')
 
 # Getting speeches links from root pages
 article_links = []
-for page in range(1,21):
+for page in range(1,26):
     driver.get(f'https://radionicaragua.com.ni/category/discurso/page/{page}/')
     content = driver.page_source
     soup = BeautifulSoup(content)
@@ -43,10 +43,13 @@ for link in article_links:
 
     article_title = soup.find("h1", class_ = "title-to-share entry-title mb-2 pb-4").text.strip()
     article_date = soup.find("div", class_ = "d-flex entry-date justify-content-end").text.strip()
-    article_content = ""
+    article_content = []
     prgphs = soup.select(".entry-content p+ p")
     for p in prgphs:
-        article_content = article_content + p.get_text()+""
+        # article_content = article_content + p + " "
+        article_content.extend(p.stripped_strings)
+    article_content = " ".join(article_content)
+        
     
     speech = {
         "title"  : article_title,
