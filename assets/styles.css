@@ -1,0 +1,24 @@
+.apptitle {
+    font-size: 56px;
+    font-family: 'Lato', sans-serif;
+    color: #201E1F;
+    font-weight: 700;
+}
+
+.ptext {
+    font-size: 18px;
+    font-family: 'Lato', sans-serif;
+    color: #201E1F;
+    font-weight: 300;
+    text-align: justify;
+    text-justify: inter-word;
+}
+
+.tablab{
+    color: #A44A3F;
+}
+
+.active-tab{
+    color: #A44A3F !important;
+    font-weight: 700;
+}
