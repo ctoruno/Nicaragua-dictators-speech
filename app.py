@@ -3,6 +3,7 @@ import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 import pandas as pd
 import plotly.express as px
+from wordcloud import WordCloud
 import requests
 import json
 
@@ -123,8 +124,9 @@ class SpeechData:
             x = "date4plot", 
             y = "count",
             color  = "spoke_person",
-            labels = {"date4plot": "Yearly Quarter", 
-                      "count"    : "Number of speeches"},
+            labels = {"date4plot"    : "Yearly Quarter", 
+                      "count"        : "Number of speeches",
+                      "spoke_person" : "Spoke Person"},
             color_discrete_sequence = ["#667761", "#a44a3f"]
         )
         fig.update_layout(
@@ -164,7 +166,28 @@ class SpeechData:
         drange = f"Data covers a period of time starting from {minDate} to {maxDate}."
         return drange
 
-data4app = SpeechData(master_data)
+class Tokenized:
+    def __init__(self, ls):
+        self.ls = ls
+
+    def WCplot(self):
+        all_tokens = [token for speech in self.ls for token in speech]
+        combined_tokens = " ".join(all_tokens)
+        wcloud = WordCloud(
+            width    = 1000, 
+            height   = 500, 
+            colormap = "twilight",
+            relative_scaling = 0.45,
+            background_color = "white"
+        ).generate(combined_tokens)
+        return wcloud
+
+# Initializing classes
+data4app   = SpeechData(master_data)
+daniel_wc  = Tokenized(tklem_speeches["Daniel"]).WCplot()
+daniel_wc.to_file('assets/daniel_wc.png')
+rosario_wc = Tokenized(tklem_speeches["Rosario"]).WCplot()
+rosario_wc.to_file('assets/rosario_wc.png')
 
 ##============================##
 ##          APP LAYOUT        ##
@@ -287,7 +310,43 @@ app.layout = dbc.Container([
                         id     = "nspeeches_sp",
                         figure = data4app.barPlot_speechlen(),
                         config = {"modeBarButtonsToRemove": removedButtons} 
-                    )
+                    ),
+                    html.P("LOREM IPSUM DOLOR"),
+                    dmc.Tabs([
+                        dmc.TabsList([
+                            dmc.Tab("Daniel Ortega", value = "DOwc"),
+                            dmc.Tab("Rosario Murillo", value = "RMwc")
+                        ]),
+                        dmc.TabsPanel(
+                            html.Div([
+                                html.Img(src = "assets/daniel_wc.png", width = "90%")
+                            ]), 
+                            value = "DOwc"
+                        ),
+                        dmc.TabsPanel(
+                            html.Div([
+                                html.Img(src = "assets/rosario_wc.png", width = "90%")
+                            ]), 
+                            value = "RMwc"
+                        )
+                        ],
+                        color = "orange",
+                        orientation = "vertical",
+                    ),
+                    dmc.Space(h = 40),
+                    dbc.Row(
+                        dbc.Col([
+                            dbc.Button(
+                                "Download the data",
+                                color = "success",
+                                id = "download-data-bttn"
+                            ),
+                            dcc.Download(id = "download-data")
+                        ], width = {"size": 4}
+                        ),
+                        justify = "end" 
+                    ),
+                    dmc.Space(h = 150)
                 ],
                 label = "Data Preview",
                 labelClassName = "tablab",
@@ -325,26 +384,19 @@ app.layout = dbc.Container([
             width = {"size": 6, "offset": 3}
         )
     )
-    
-        
-    # dcc.Dropdown(options = ["Daniel Ortega", "Rosario Murillo"], 
-    #              value   = "Daniel Ortega",
-    #              id      = "spoke_person"),
-    # dash_table.DataTable(page_size = 10, id = "dta_preview")
 ], fluid = True)
 
 ##============================##
 ##         CALLBACKs          ##
 ##============================##
 
-# @app.callback(
-#     Output("extractLink", "href"),
-#     Input("extractButton", "n_clicks")
-# )
-# def open_url_in_new_tab(n_clicks):
-#     if n_clicks:
-#         return extractGH
-#     return no_update
+@callback(
+    Output("download-data", "data"),
+    Input("download-data-bttn", "n_clicks"),
+    prevent_initial_call = True,
+)
+def func(n_clicks):
+    return dcc.send_data_frame(master_data.to_csv, "speech_data.csv")
 
 # Run the app
 if __name__ == '__main__':
