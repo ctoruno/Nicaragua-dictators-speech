@@ -9,16 +9,47 @@
     font-size: 18px;
     font-family: 'Lato', sans-serif;
     color: #201E1F;
-    font-weight: 300;
+    font-weight: 350;
     text-align: justify;
     text-justify: inter-word;
 }
 
 .tablab{
-    color: #A44A3F;
+    color: #667761;
 }
 
 .active-tab{
-    color: #A44A3F !important;
+    color: #667761 !important;
     font-weight: 700;
+}
+
+.tablab-topic{
+    color: #667761;
+    font-size: small;
+}
+
+.active-tab-topic{
+    color: #667761 !important;
+    font-weight: 600;
+}
+
+#download-data-bttn {
+    background-color: #E9F2E3;
+    border-radius: 8px;
+    border: 2px solid #E9F2E3 !important;
+    color: #667761;
+    text-align: center;
+    font-weight: 700;
+    padding: 12px 28px;
+}
+
+#download-data-bttn:hover {
+    background-color: #667761;
+    border: 2px solid #667761 !important;
+    color: #ffffff;
+}
+
+#extractButton:hover{
+    background-color: #A44A3F;
+    color: #ffffff;
 }

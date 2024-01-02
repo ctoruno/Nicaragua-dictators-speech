@@ -10,15 +10,23 @@ import json
 ##============================##
 ##      DATA & Classes        ##
 ##============================##
+
+# Reading data
 master_data = pd.read_csv("https://raw.githubusercontent.com/ctoruno/Nicaragua-dictators-speech/main/Data/speech_data.csv")
 master_data["date"] = pd.to_datetime(master_data["date"], format = "%Y-%m-%d")
 
 response = requests.get("https://raw.githubusercontent.com/ctoruno/Nicaragua-dictators-speech/main/Data/tklem_speeches.json")
 tklem_speeches = json.loads(response.text)
 
+with open("assets/LDAvis_daniel.html", 'r') as file:
+    Daniel_LDA = file.read()
+with open("assets/LDAvis_rosario.html", 'r') as file:
+    Rosario_LDA = file.read()
+
 # Initializing the app
 app = Dash(__name__,
            external_stylesheets = [dbc.themes.SPACELAB, "/assets/styles.css"])
+server = app.server
 
 # Defining the SpeechData class
 class SpeechData:
@@ -121,12 +129,13 @@ class SpeechData:
         
         fig = px.line(
             grouped_data, 
-            x = "date4plot", 
+            x = grouped_data.index, 
             y = "count",
             color  = "spoke_person",
             labels = {"date4plot"    : "Yearly Quarter", 
                       "count"        : "Number of speeches",
                       "spoke_person" : "Spoke Person"},
+            custom_data   = ["date4plot", "spoke_person"],
             color_discrete_sequence = ["#667761", "#a44a3f"]
         )
         fig.update_layout(
@@ -140,7 +149,9 @@ class SpeechData:
             plot_bgcolor   = "#FFFFFF",
             xaxis          = dict(
                 tickangle  = 45,
-                fixedrange = True
+                fixedrange = True,
+                title      = dict(text = "Yearly Quarter", font = dict(family = "Open Sans"), standoff = 40),
+                showticklabels = False
             ),
             yaxis          = dict(
                 dtick      = 20,
@@ -153,6 +164,9 @@ class SpeechData:
             ),
             font = dict(family = "Open Sans")
             )
+        fig.update_traces(
+            hovertemplate = "Date: %{customdata[0]}<br>Total speeches: %{y}"
+        )
         return fig
     
     def totalSpeeches(self):
@@ -203,14 +217,15 @@ app.layout = dbc.Container([
     ),
     dbc.Row(
         dbc.Col(
-            html.P(
+            dcc.Markdown(
                 """
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                Sed ornare justo eu turpis condimentum, in dapibus sapien 
-                lacinia. Fusce vitae justo ac purus fermentum ullamcorper 
-                a a elit. Donec sit amet nulla eu libero dapibus lacinia. 
-                Pellentesque habitant morbi tristique senectus et netus et 
-                malesuada fames ac turpis egestas.
+                Welcome to *A Dictator's Speech* - a collection of speeches delivered by Nicaragua's President and Vice-President. 
+                We've compiled this data from official transcripts found in pro-government media. Our goal is to provide 
+                accessible data for future research. In the tabs below, you can find a **_data preview_**, a basic **_topic modeling_**, 
+                and a simple **_sentiment analysis_**. Feel free to download the data by clicking on the button at the bottom of this 
+                page.
+
+                The python code for this project is publicly available on [this GitHub repository](https://github.com/ctoruno/Nicaragua-dictators-speech).
                 """,
                 className = "text-justify ptext"
             ),
@@ -218,12 +233,6 @@ app.layout = dbc.Container([
         )
     ),
     dmc.Space(h = 22),
-    # dbc.Row(
-    #     dbc.Col(
-    #         dmc.Divider(variant = "solid"),
-    #         width = {"size": 8, "offset": 2}
-    #     )
-    # ),
     dbc.Row(
         dbc.Col(
             dbc.Tabs([
@@ -293,25 +302,57 @@ app.layout = dbc.Container([
                         )
                     ]),
                     dmc.Space(h = 32),
-                    html.P("LOREM IPSUM DOLOR"),
+                    # dmc.Divider(variant = "solid"),
+                    # dmc.Space(h = 15),
+                    dcc.Markdown(
+                        """
+                        From September 2015 to December 2023, we extracted 1,742 speech transcripts. Surprisingly, 93% of these speeches were delivered by 
+                        Vice-President Rosario Murillo. In contrast, President Daniel Ortega contributed only 112 speeches. This significant disparity arises 
+                        from the Vice-President's regular weekday messages to the nation, while the President reserves speeches only for special events.
+                        """,
+                        className = "text-justify ptext"
+                    ),
                     dcc.Graph(
                         id     = "nspeeches_sp",
                         figure = data4app.barPlot_nspeeches(),
                         config = {"modeBarButtonsToRemove": removedButtons} 
                     ),
-                    html.P("LOREM IPSUM DOLOR"),
+                    dcc.Markdown(
+                        """
+                        The amount of speeches given by the presidential couple has been stable over time since 2016. There was a brief significant decrease
+                        of messages to the nation given by the Vice-President Rosario Murillo between the first quarter (March) of 2019 and the fourth quarter (December)
+                        of 2020. This decrease might have been due to the first months of the global COVID-19 pandemic.
+                        """,
+                        className = "text-justify ptext"
+                    ),
                     dcc.Graph(
                         id     = "nspeeches_sp",
                         figure = data4app.lineChart_sp(),
                         config = {"modeBarButtonsToRemove": removedButtons} 
                     ),
-                    html.P("LOREM IPSUM DOLOR"),
+                    dmc.Space(h = 26),
+                    dcc.Markdown(
+                        """
+                        Typically, President Daniel Ortega's speeches surpass the length of those given by the Vice-President. Daniel Ortega's speeches 
+                        can extend to nearly 2,800 words, while Rosario Murillo's messages average less than 2,200 words in length.
+                        """,
+                        className = "text-justify ptext"
+                    ),
                     dcc.Graph(
                         id     = "nspeeches_sp",
                         figure = data4app.barPlot_speechlen(),
                         config = {"modeBarButtonsToRemove": removedButtons} 
                     ),
-                    html.P("LOREM IPSUM DOLOR"),
+                    dcc.Markdown(
+                        """
+                        When examining their choice of words, distinctive sets of phrases emerge. President Daniel Ortega often employs direct and populist 
+                        language, such as "People United", "People's Power", "War and Peace", "Yankee". In contrast, the Vice-President adopts a more religious 
+                        and passive tone, utilizing phrases like "Thanks God", "Nicaraguan Families", and "Blessed Nicaragua".
+
+                        _Click the tabs below to see a word cloud of the most frequent bigrams used by the Presidential couple_.
+                        """,
+                        className = "text-justify ptext"
+                    ),
                     dmc.Tabs([
                         dmc.TabsList([
                             dmc.Tab("Daniel Ortega", value = "DOwc"),
@@ -332,21 +373,7 @@ app.layout = dbc.Container([
                         ],
                         color = "orange",
                         orientation = "vertical",
-                    ),
-                    dmc.Space(h = 40),
-                    dbc.Row(
-                        dbc.Col([
-                            dbc.Button(
-                                "Download the data",
-                                color = "success",
-                                id = "download-data-bttn"
-                            ),
-                            dcc.Download(id = "download-data")
-                        ], width = {"size": 4}
-                        ),
-                        justify = "end" 
-                    ),
-                    dmc.Space(h = 150)
+                    )
                 ],
                 label = "Data Preview",
                 labelClassName = "tablab",
@@ -355,7 +382,85 @@ app.layout = dbc.Container([
                 ),
                 dbc.Tab([
                     dmc.Space(h = 22),
-                    html.P("LOREM IPSUM DOLOR")
+                     dcc.Markdown(
+                        """
+                        Below, you can find a basic Topic Modelling using a Latent Dirichlet Allocation (LDA) algorithm. Topic modeling is a technique 
+                        to discover underlying themes in a collection of text documents (such as our speech transcripts) by identifying common patterns 
+                        and grouping words into topics.
+
+                        The LDA model was configured to identify four overarching topics in the President's speeches while only three broad topics in 
+                        the Vice President's. This adjustment aimed to mitigate topic overlap, as depicted in the graph below. However, it should be 
+                        noted that the likelihood of overlap in their speeches remains considerable. As such, these findings should be interpreted 
+                        with caution. Additionally, we suggest using a medium grade relevance metric (λ = 0.6). 
+
+                        Under these assumptions, the following highlights arise:
+
+                        - Daniel Ortega has four broad topics:
+                            - The first (and main) topic has a high prevalence of the old latin american left-wing governments (Hugo Chavez in Venezuela,  
+                            Fidel Castro in Cuba) as well as terms usually related to this political group: Yankee, Sandino, among others.
+                            - The second biggest topic is highly random and white noise.
+                            - The third topic in prevalence, is very related to the first one. However, it has a high prevalence of topics and 
+                            institutions prominent in Authoritarian figures (such as the Police and the Army) but also topics common in left-wing
+                            speeches such as education.
+                            - A fourth topic comprising less than 10% of the analyzed tokens has a high prevalence of private firms and institutions
+                            (such as LAFISE, Cargill, AmCham) as well as mentions to local opposition figures such as the Bishop.
+
+                            
+                        - Rosario Murillo has two main topics:
+                            - The first (and main) topic has a high prevalence of social issues such as poverty, hospitals, justice, agriculture, equality
+                            and rights.
+                            - The second most important topic has a high prevalence of topics related to a national reconciliation, hope, national 
+                            sovereignty, motherland, dignity.
+                        """,
+                        className = "text-justify ptext"
+                    ),
+                    dmc.Space(h = 32),
+                    dbc.Tabs([
+                        dbc.Tab(
+                            [
+                                html.Div(
+                                    html.Iframe(
+                                        srcDoc = Daniel_LDA,
+                                        width  = "800vw",
+                                        height = "900px",
+                                        style = {                                        
+                                            "transform"       : "scale(0.95)",
+                                            "transform-origin": "0 0",
+                                            "overflow"        : "hidden"
+                                        }
+                                    ),
+                                    style = {"width": "100%"}
+                                )
+                            ],
+                            style = {"width": "100%", "overflow": "hidden", "textAlign": "center"},
+                            label = "Daniel Ortega",
+                            id = "tab-LDA-Daniel",
+                            labelClassName = "tablab-topic",
+                            activeLabelClassName = "active-tab-topic"
+                        ),
+                        dbc.Tab(
+                            [
+                                html.Div(
+                                    html.Iframe(
+                                        srcDoc = Rosario_LDA,
+                                        width  = "800vw",
+                                        height = "900px",
+                                        style = {                                        
+                                            "transform"       : "scale(0.95)",
+                                            "transform-origin": "0 0",
+                                            "overflow"        : "hidden"
+                                        }
+                                    ),
+                                    style = {"width": "100%"}
+                                )
+                            ],
+                            style = {"width": "100%", "overflow": "hidden", "textAlign": "center"},
+                            label = "Rosario Murillo",
+                            id = "tab-LDA-Rosario",
+                            labelClassName = "tablab-topic",
+                            activeLabelClassName = "active-tab-topic"
+                        )
+                    ]),
                     ],
                     label = "Topic Modelling",
                     labelClassName = "tablab",
@@ -364,7 +469,7 @@ app.layout = dbc.Container([
                 ),
                 dbc.Tab([
                     dmc.Space(h = 22),
-                    html.P("LOREM IPSUM DOLOR")
+                    html.P("UNDER DEVELOPMENT.")
                     ],
                     label = "Sentiment Analysis",
                     labelClassName = "tablab",
@@ -373,7 +478,50 @@ app.layout = dbc.Container([
                 ),
                 dbc.Tab([
                     dmc.Space(h = 22),
-                    html.P("LOREM IPSUM DOLOR")
+                    dcc.Markdown(
+                        """
+                        ### Licence
+
+                        Copyright (c) 2023
+
+                        _Permission is hereby granted, free of charge, to any person obtaining a copy
+                        of this software and associated documentation files (the "Software"), to deal
+                        in the Software without restriction, including without limitation the rights
+                        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+                        copies of the Software, and to permit persons to whom the Software is
+                        furnished to do so, subject to the following conditions_:
+
+                        _The above copyright notice and this permission notice shall be included in all
+                        copies or substantial portions of the Software._
+
+                        _THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+                        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+                        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+                        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+                        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+                        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+                        SOFTWARE._
+
+                        ### Disclaimer
+
+                        This application ("App") is provided for informational purposes only. The content 
+                        within the App is not intended to be a substitute for professional advice. While 
+                        efforts have been made to ensure the accuracy and reliability of the information 
+                        provided, the creators make no representations or warranties of any kind, express 
+                        or implied, about the completeness, accuracy, reliability, suitability, or 
+                        availability with respect to the App or the information, products, services, or 
+                        related graphics contained within the App for any purpose. 
+
+                        The use of this App is at your own risk. The creators shall not be liable for 
+                        any loss or damage arising from the use of this page.
+
+                        Please note that the App may contain links to external websites or resources. 
+                        The inclusion of any links does not necessarily imply a recommendation or 
+                        endorsement of the views expressed within them.
+
+                        """,
+                        className = "text-justify ptext"
+                    )
                     ],
                     label = "About",
                     labelClassName = "tablab",
@@ -383,7 +531,23 @@ app.layout = dbc.Container([
             ]),
             width = {"size": 6, "offset": 3}
         )
-    )
+    ),
+    dmc.Space(h = 40),
+    dbc.Row(
+        dbc.Col([
+            html.Div([
+                html.Button(
+                    "Download Data",
+                    # color = "success",
+                    id = "download-data-bttn"
+                ),
+                dcc.Download(id = "download-data")
+            ])
+        ], width = {"size": 4}
+        ),
+        justify = "end" 
+    ),
+    dmc.Space(h = 150)
 ], fluid = True)
 
 ##============================##
