@@ -198,10 +198,10 @@ class Tokenized:
 
 # Initializing classes
 data4app   = SpeechData(master_data)
-daniel_wc  = Tokenized(tklem_speeches["Daniel"]).WCplot()
-daniel_wc.to_file('assets/daniel_wc.png')
-rosario_wc = Tokenized(tklem_speeches["Rosario"]).WCplot()
-rosario_wc.to_file('assets/rosario_wc.png')
+# daniel_wc  = Tokenized(tklem_speeches["Daniel"]).WCplot()
+# daniel_wc.to_file('assets/daniel_wc.png')
+# rosario_wc = Tokenized(tklem_speeches["Rosario"]).WCplot()
+# rosario_wc.to_file('assets/rosario_wc.png')
 
 ##============================##
 ##          APP LAYOUT        ##
