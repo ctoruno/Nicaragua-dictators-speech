@@ -1,5 +1,5 @@
 # Nicaragua-dictators-speech
-**Nicaragua: A Dictator's Speech** is a data base of speeches delivered by Nicaragua's President and Vice-President. We've compiled this data from official transcripts found in pro-government media. Our goal is to provide accessible data for future research. The data project has a [website](https://nicaragua-dictators-speech) that is regularly updated. There, you can find a _data preview_, a basic _topic modeling_, and a simple _sentiment analysis_. Feel free to download the data from this repository or from the website.
+**Nicaragua: A Dictator's Speech** is a data base of speeches delivered by Nicaragua's President and Vice-President. We've compiled this data from official transcripts found in pro-government media. Our goal is to provide accessible data for future research. The data project has a [website](https://nicaragua-dictators-speech.onrender.com/) that is regularly updated. There, you can find a _data preview_, a basic _topic modeling_, and a simple _sentiment analysis_. Feel free to download the data from this repository or from the website.
 
 ![](assets/preview.png)
 
